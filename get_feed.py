@@ -4,6 +4,7 @@ import sys
 import html
 import bleach
 import traceback
+import sys
 
 from calendar import timegm
 from datetime import datetime
@@ -47,7 +48,7 @@ for feed in Feed.objects.all():
         #print(item)
         #print(item['title'])
         #item['published'],item['link'])
-    
+        
         post = Post(feed=feed,title=bleach.clean(item['title']), link=item['link'])
         if 'published_parsed' in item:
           post.published = datetime.fromtimestamp(timegm(item['published_parsed']),tz=tz.tzutc())
@@ -57,4 +58,4 @@ for feed in Feed.objects.all():
           post.description = filter(item['description'])
         post.save()
   except Exception:
-     traceback.print_exc(file=sys.err)
+     traceback.print_exc(file=sys.stderr)

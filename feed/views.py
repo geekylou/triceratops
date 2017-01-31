@@ -6,9 +6,11 @@ from feed.models import Post
 from calendar import timegm
 from datetime import datetime
 from dateutil import tz
+import json
 
 def index(request):
     increment_amount = 10;
+    max_items = 25
     feed_items = []
     template = loader.get_template('feed/templates/index.html')
     feed = Post.objects.filter(feed__enabled=True).order_by('-published')
@@ -26,7 +28,6 @@ def index(request):
         max_items = int(request.GET['max_items'])
         
     if max_items>0:
-        max_items = int(request.GET['max_items'])
         feed_items = feed[:max_items].all()
         print(feed.count(),max_items)
         item_overflow = { 'overflow' : max_items < feed.count(),
@@ -43,4 +44,6 @@ def index(request):
             'feed': feed_items,
             'item_overflow' : item_overflow
     }
+    #if 'json' in request.GET:
+    #    return json.dumps(context)
     return HttpResponse(template.render(context, request))
