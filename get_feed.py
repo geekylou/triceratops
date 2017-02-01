@@ -26,6 +26,8 @@ django.setup()
 
 from feed.models import *
 
+txt=""
+
 for feed in Feed.objects.all():
   print("Getting rss feed "+feed.link)
   try:
@@ -56,6 +58,8 @@ for feed in Feed.objects.all():
           post.published = datetime.fromtimestamp(timegm(item['updated_parsed']),tz=tz.tzutc())
         if 'description' in item:    
           post.description = filter(item['description'])
+          txt=filter(item['description'])
         post.save()
   except Exception:
      traceback.print_exc(file=sys.stderr)
+     print(txt)

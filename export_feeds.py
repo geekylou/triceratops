@@ -12,5 +12,5 @@ if sys.argv[1] == 'export':
         print(feed.link)
 elif sys.argv[1] == 'import':
     for line in sys.stdin:
-        feed = Feed(feed=feed,link=line)
+        feed = Feed(link=line,title="")
         feed.save()
