@@ -38,7 +38,7 @@ fetch(url+'&no_header',
   credentials: 'include'
 }).then(function(responseObj) 
 {
-  console.log('status: ', responseObj.status);
+  //console.log('status: ', responseObj.status);
   return responseObj.text();
 }).then(function(text) 
 {
@@ -56,13 +56,13 @@ return false;
 function likeLink(evt)
 {
     var form=evt.target.parentNode;
-fetch('action', {
+fetch(window.location.pathname + '/' + 'action', {
 	method: 'post',
     credentials: 'include',
 	body: new FormData(form)
  }).then(function(responseObj) 
 {
-  console.log('status: ', responseObj.status);
+  //console.log('status: ', responseObj.status);
   return responseObj.json();
 }).then(function(json) 
 {
