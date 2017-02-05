@@ -1,0 +1,152 @@
+{% if header %}
+<!DOCTYPE html>
+<html>
+<body>
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet"
+href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet"
+href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
+crossorigin="anonymous">
+
+<script>
+function myFunction(evt) {
+    var container = evt.path[3].children[1];
+    if(container.style.maxHeight==="")
+    {
+      container.style.maxHeight="300px";
+      evt.target.textContent="+";
+    }
+    else
+    {
+      container.style.maxHeight="";
+      evt.target.textContent="-";
+    }
+}
+
+function loadMoreLink(evt)
+{
+var url = document.getElementById("nextUrl").href;
+fetch(url+'&no_header',
+{
+  credentials: 'include'
+}).then(function(responseObj) 
+{
+  console.log('status: ', responseObj.status);
+  return responseObj.text();
+}).then(function(text) 
+{
+  //console.log('html: ', text);
+  var overflow = document.getElementById("overflow");
+  var feed = document.getElementById("content");
+  overflow.parentNode.removeChild(overflow);
+  var next_div = document.createElement("div");
+  next_div.innerHTML=text;
+  feed.appendChild(next_div);
+});
+return false;
+}
+
+function likeLink(evt)
+{
+    var form=evt.target.parentNode;
+fetch('action', {
+	method: 'post',
+    credentials: 'include',
+	body: new FormData(form)
+ }).then(function(responseObj) 
+{
+  console.log('status: ', responseObj.status);
+  return responseObj.json();
+}).then(function(json) 
+{
+  //console.log('html: ', json);
+  var element = evt.target.getElementsByTagName("span");
+  var form = evt.target.form;
+  //console.log(form[0]);
+  var liked = json["liked"];
+  if (liked == "1")
+  {
+    element[0].style.color="orange";
+    form[0].value="0";
+  }
+  else
+  {
+    element[0].style.color="";
+    form[0].value="1";
+  }
+});
+return false;
+}
+</script>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <div class="navbar-brand">RSS</div>
+    </div>
+    <nav id="bs-navbar" class="collapse navbar-collapse">
+      <ul class="nav navbar-nav">
+        <li class="active" id="navbar_home"><a>Feed</a></li>
+{% if future_use %}
+        <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+        </ul>
+        </li>
+{% endif %}
+      </ul>
+      
+      <div id="login_form">
+      {% if login %}
+            <form class="navbar-form navbar-right" method="post" action="">
+	    {% csrf_token %}
+            <input type="hidden" name="action" value="logout">
+            <button id="logout-submit" type="submit" class="btn btn-success">Sign Out</button>
+            </form>           
+      {% else %}            
+          <form class="navbar-form navbar-right" id="login-form" action="" method="post">
+	        {% csrf_token %}
+                <input type="hidden" name="action" value="login">
+                <div class="form-group">
+                  <input id="login-username" name="username" type="text" placeholder="Username" class="form-control">
+                </div>
+                <div class="form-group">
+                  <input id="login-password" name="password" type="password" placeholder="Password" class="form-control">
+                </div>
+                <button id="login-submit" type="submit" class="btn btn-success">Sign in</button>
+           </form>            
+      {% endif %}
+       </div>
+    </nav><!--/.navbar-collapse -->
+  </div>
+</nav>
+<div id="content" style="margin-top:62px">
+{% endif %}
+{% block content %}{% endblock %}
+
+{% if header %}
+</div>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</body>
+</html>
+{% endif %}
