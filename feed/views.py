@@ -43,7 +43,10 @@ def index(request):
     context = {
             'feed': feed_items,
             'item_overflow' : item_overflow
-    }
+    }        
+    if 'no_header' not in request.GET:
+        context['header'] = True
+    
     #if 'json' in request.GET:
     #    return json.dumps(context)
     return HttpResponse(template.render(context, request))

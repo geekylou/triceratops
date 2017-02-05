@@ -35,4 +35,23 @@ class Post(models.Model):
             ret = self.title
         else:
             ret = self.link
-        return ret   
+        return ret
+
+@python_2_unicode_compatible
+class TagName(models.Model):
+    name = models.CharField(primary_key=True,max_length=255)
+    
+@python_2_unicode_compatible
+class Tag(models.Model):
+    post = models.ForeignKey(
+    Post,
+    on_delete=models.CASCADE,
+    )
+    feed = models.ForeignKey(
+    Feed,
+    on_delete=models.CASCADE,
+    )
+    name = models.ForeignKey(
+    TagName,
+    on_delete=models.CASCADE,
+    )

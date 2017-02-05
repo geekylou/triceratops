@@ -23,13 +23,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 #SECRET_KEY = '710-6sc-1js0g^k1=i$ilsp==60e%!-*1^+*075e^peh^7x=)j'
 
-with open('/var/www/rss_reader/secret_key.txt') as f:
+with open('../secret_key.txt') as f:
     SECRET_KEY = f.read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['blog.geekylou.me.uk','127.0.0.1']
+ALLOWED_HOSTS = ['house-nas','127.0.0.1']
 
 
 # Application definition
@@ -78,23 +78,23 @@ WSGI_APPLICATION = 'rss_test.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#    }
-#}
-
-# Production DB
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'OPTIONS': {
-            'read_default_file': '/var/www/rss_reader/my.cnf',
-            'charset': 'utf8mb4'
-            }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+# Production DB
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.mysql',
+#        'OPTIONS': {
+#            'read_default_file': '/var/www/rss_reader/my.cnf',
+#            'charset': 'utf8mb4'
+#            }
+#    }
+#}
 
 
 # Password validation
@@ -134,4 +134,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '../static'
+#STATIC_ROOT = '../static'

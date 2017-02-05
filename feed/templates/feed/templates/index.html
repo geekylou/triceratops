@@ -1,3 +1,4 @@
+{% if header %}
 <!DOCTYPE html>
 <html>
 <body>
@@ -27,11 +28,74 @@ function myFunction(evt) {
       container.style.maxHeight="";
       evt.target.textContent="-";
     }
-  }
+}
+
+function loadMoreLink(evt)
+{
+var url = document.getElementById("nextUrl").href;
+fetch(url+'&no_header',
+{
+  credentials: 'include'
+}).then(function(responseObj) 
+{
+  console.log('status: ', responseObj.status);
+  return responseObj.text();
+}).then(function(text) 
+{
+  console.log('html: ', text);
+  var overflow = document.getElementById("overflow");
+  var feed = document.getElementById("feed");
+  overflow.parentNode.removeChild(overflow);
+  var next_div = document.createElement("div");
+  next_div.innerHTML=text;
+  feed.appendChild(next_div);
+});
+return false;
+}
 </script>
 
-<div id="feed">
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Open profile</a>
+    </div>
+    <nav id="bs-navbar" class="collapse navbar-collapse">
+      <ul class="nav navbar-nav">
+        <li class="active" id="navbar_home"><a>Feed</a></li>
+        <li id="navbar_contacts"><a>Contacts</a></li>
+        <li id="navbar_profile"><a>Profile</a></li>
+      </ul>
+      
+      <div id="login_form">
+      {% if login %}
+          <form class="navbar-form navbar-right" id="login-form">
+                <div class="form-group">
+                  <input id="login-username" type="text" placeholder="Username" class="form-control">
+                </div>
+                <div class="form-group">
+                  <input id="login-password" type="password" placeholder="Password" class="form-control">
+                </div>
+                <button id="login-submit" type="submit" class="btn btn-success">Sign in</button>
+           </form>
+      {% else %}
+            <form class="navbar-form navbar-right" id="login-form">
+            <button id="logout-submit" type="submit" class="btn btn-success">Sign Out</button>
+            </form>
+      {% endif %}
+       </div>
+    </nav><!--/.navbar-collapse -->
+  </div>
+</nav>
 
+<div id="feed" style="margin-top:62px">
+{% endif %}
+{% login %}
 {% for item in feed %}
 <div class="panel panel-default" style="margin-left:50px;margin-right:50px;margin-top:5px">
 <div class="panel-heading">
@@ -48,18 +112,20 @@ function myFunction(evt) {
 </div>
 </div>
 {% endfor %}
-</div>
 {% if item_overflow.overflow %}
-<div class="panel panel-default" style="margin-left:50px;margin-right:50px;margin-top:5px">
+<div id="overflow" class="panel panel-default" style="margin-left:50px;margin-right:50px;margin-top:5px">
 <div class="panel-heading">
-<a href="?timestamp={{ item_overflow.last_timestamp }}&max_items={{ item_overflow.max_items }}">Load more...</a>
+<a id="nextUrl" href="?timestamp={{ item_overflow.last_timestamp }}&max_items={{ item_overflow.max_items }}" onclick="return loadMoreLink(event)">Load more...</a>
 </div>
 </div>
 {% endif %}
+{% if header %}
+</div>
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 </body>
 </html>
+{% endif %}
