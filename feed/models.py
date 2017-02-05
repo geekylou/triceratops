@@ -30,6 +30,8 @@ class Post(models.Model):
     published = models.DateTimeField(null=True,blank=True)
     link = models.CharField(primary_key=True,max_length=255)
     description = models.TextField(blank=True)
+    liked       = models.BooleanField(default=False)
+    
     def __str__(self):
         if self.title != "":
             ret = self.title
@@ -45,10 +47,6 @@ class TagName(models.Model):
 class Tag(models.Model):
     post = models.ForeignKey(
     Post,
-    on_delete=models.CASCADE,
-    )
-    feed = models.ForeignKey(
-    Feed,
     on_delete=models.CASCADE,
     )
     name = models.ForeignKey(

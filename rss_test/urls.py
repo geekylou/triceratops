@@ -20,5 +20,6 @@ import feed.views
 
 urlpatterns = [
     url(r'^$', feed.views.index, name='index'),
+    url(r'^action$', feed.views.action, name='action'),
     url(r'^admin/', admin.site.urls),
 ]
