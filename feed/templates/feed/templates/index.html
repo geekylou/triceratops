@@ -12,6 +12,7 @@
 {{ item.description|safe }}
 </div>
 <div class="panel-footer">
+{% if login %}
 <form action="" method="post" style="display: inline-block;">
 {% if item.liked %}
 <input type="hidden" id="liked" name="like" value="0">
@@ -29,6 +30,7 @@
 {% endif %}
 </button>
 </form>
+{% endif %}
 {{ item.published }}
 </div>
 </div>

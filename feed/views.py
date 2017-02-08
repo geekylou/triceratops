@@ -78,7 +78,7 @@ def index(request):
     if 'max_items' in request.GET:
         max_items = int(request.GET['max_items'])
         
-    if max_items>0:
+    if max_items>0 and len(feed.all()) >0:
         feed_items = feed[:max_items].all()
         #print(feed.count(),max_items)
         item_overflow = { 'overflow' : max_items < feed.count(),
