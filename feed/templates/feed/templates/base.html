@@ -56,32 +56,39 @@ return false;
 function likeLink(evt)
 {
     var form=evt.target.parentNode;
-    // window.location.pathname + '/' +
-fetch( '{{ base_url }}action', {
+fetch(window.location.pathname + '/' + 'action', {
 	method: 'post',
     credentials: 'include',
 	body: new FormData(form)
  }).then(function(responseObj) 
 {
-  //console.log('status: ', responseObj.status);
-  return responseObj.json();
-}).then(function(json) 
-{
-  //console.log('html: ', json);
-  var element = evt.target.getElementsByTagName("span");
-  var form = evt.target.form;
-  //console.log(form[0]);
-  var liked = json["liked"];
-  if (liked == "1")
+  if (responseObj.status !== 200) 
   {
-    element[0].style.color="orange";
-    form[0].value="0";
+    console.log('status: ', responseObj.status);
+    responseObj.text().then(function(text)
+    {
+      console.log('html: ', text);
+    });
   }
-  else
+  else responseObj.json().then(function(json) 
   {
-    element[0].style.color="";
-    form[0].value="1";
-  }
+    //console.log('html: ', json);
+    var element = evt.target.getElementsByTagName("span");
+    var form = evt.target.form;
+    //console.log(form[0]);
+    var liked = json["liked"];
+    if (liked == "1")
+    {
+      element[0].style.color="orange";
+      form[0].value="0";
+    }
+    else
+    {
+      element[0].style.color="";
+      form[0].value="1";
+    }
+  });
+  
 });
 return false;
 }
@@ -100,17 +107,16 @@ return false;
     </div>
     <nav id="bs-navbar" class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
-{% if login %}
+        <li class="active" id="navbar_home"><a>Feed</a></li>
+{% if future_use %}
         <li class="dropdown">
-        <a href="#" class="active" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Feed <span class="caret"></span></a>
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
         <ul class="dropdown-menu">
-            <li><a href="{{ base_url }}">Alll</a></li>
-            <li><a href="{{ base_url }}?liked">Liked</a></li>
-            <li><a href="{{ base_url }}feeds">Feeds</a></li>
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
         </ul>
         </li>
-{% else %} 
-         <li class="active" id="navbar_home"><a>Feed</a></li>
 {% endif %}
       </ul>
       

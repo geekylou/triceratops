@@ -13,7 +13,6 @@
 </div>
 <div class="panel-footer">
 <form action="" method="post" style="display: inline-block;">
-{% if login %}
 {% if item.liked %}
 <input type="hidden" id="liked" name="like" value="0">
 {% else %}
@@ -21,7 +20,7 @@
 {% endif %}
 <input type="hidden" name="action" value="like">
 {% csrf_token %}
-<button type="button" class="btn btn-default btn-sm" onclick="return likeLink(event)">
+<button type="submit" class="btn btn-default btn-sm" onclick="return likeLink(event)">
 <input type="hidden" name="link" value="{{ item.link }}">
 {% if item.liked %}
   <span class="glyphicon glyphicon-star"  style="color:orange" aria-hidden="true"></span> Like
@@ -30,7 +29,6 @@
 {% endif %}
 </button>
 </form>
-{% endif %}
 {{ item.published }}
 </div>
 </div>
@@ -38,7 +36,7 @@
 {% if item_overflow.overflow %}
 <div id="overflow" class="panel panel-default" style="margin-left:50px;margin-right:50px;margin-top:5px">
 <div class="panel-heading">
-<a id="nextUrl" href="?timestamp={{ item_overflow.last_timestamp }}&max_items={{ item_overflow.max_items }}{{ args }}" onclick="return loadMoreLink(event)">Load more...</a>
+<a id="nextUrl" href="?timestamp={{ item_overflow.last_timestamp }}&max_items={{ item_overflow.max_items }}" onclick="return loadMoreLink(event)">Load more...</a>
 </div>
 </div>
 {% endif %}
