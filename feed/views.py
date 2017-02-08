@@ -3,10 +3,11 @@ from django.http import HttpResponse
 from django.template import loader
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
-from feed.models import Post
+from feed.models import Post,Feed
 from calendar import timegm
 from datetime import datetime
 from dateutil import tz
+import rss_test.settings
 import json
 
 def action(request):
@@ -33,8 +34,25 @@ def action(request):
         response=json.dumps(resp)
     #print("response:"+response)
     return HttpResponse(response, content_type="application/json")
+
+@login_required
+def feeds(request):
+    template = loader.get_template('feed/templates/feeds.html')
+    feeds = Feed.objects.all()
+    args = ''
+    
+    context = {
+            'feeds': feeds,
+            'login' : request.user.is_authenticated,
+            'args' : args,
+            'base_url' : rss_test.settings.BASE_URL
+    }        
+    if 'no_header' not in request.GET:
+        context['header'] = True
+    return HttpResponse(template.render(context, request))
     
 def index(request):
+    args = ''
     increment_amount = 10;
     max_items = 25
     feed_items = []
@@ -46,7 +64,10 @@ def index(request):
     
     if not request.user.is_authenticated:
         feed = feed.filter(feed__public=True)
-    
+    else:
+        if 'liked' in request.GET:
+            feed = feed.filter(liked=True)
+            args = '&liked'
     if 'increment_amount' in request.GET:
         increment_amount = int(request.GET['increment_amount'])
         
@@ -73,7 +94,9 @@ def index(request):
     context = {
             'feed': feed_items,
             'item_overflow' : item_overflow,
-            'login' : request.user.is_authenticated
+            'login' : request.user.is_authenticated,
+            'args' : args,
+            'base_url' : rss_test.settings.BASE_URL
     }        
     if 'no_header' not in request.GET:
         context['header'] = True
