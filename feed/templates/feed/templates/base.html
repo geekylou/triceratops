@@ -55,7 +55,7 @@ return false;
 
 function likeLink(evt)
 {
-    var form=evt.target.parentNode;
+    var form=evt.currentTarget.parentNode;
 fetch('{{ base_url }}action', {
 	method: 'post',
     credentials: 'include',
@@ -67,14 +67,15 @@ fetch('{{ base_url }}action', {
     console.log('status: ', responseObj.status);
     responseObj.text().then(function(text)
     {
+      console.log(evt);
+      console.log(form);
       console.log('html: ', text);
     });
   }
   else responseObj.json().then(function(json) 
   {
     //console.log('html: ', json);
-    var element = evt.target.getElementsByTagName("span");
-    var form = evt.target.form;
+    var element = form.getElementsByTagName("span");
     //console.log(form[0]);
     var liked = json["liked"];
     if (liked == "1")
@@ -87,8 +88,7 @@ fetch('{{ base_url }}action', {
       element[0].style.color="";
       form[0].value="1";
     }
-  });
-  
+  });  
 });
 return false;
 }
