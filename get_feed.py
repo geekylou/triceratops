@@ -51,7 +51,11 @@ for feed in Feed.objects.all():
         #print(item['title'])
         #item['published'],item['link'])
         
-        post = Post(feed=feed,title=bleach.clean(item['title']), link=item['link'])
+        post_query = Post.objects.filter(link=item['link'])
+        if post_query.exists():
+            post = post_query.first()
+        else:
+            post = Post(feed=feed,title=bleach.clean(item['title']), link=item['link'])
         if 'published_parsed' in item:
           post.published = datetime.fromtimestamp(timegm(item['published_parsed']),tz=tz.tzutc())
         elif 'updated_parsed' in item:
