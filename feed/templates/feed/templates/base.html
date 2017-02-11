@@ -17,7 +17,26 @@ crossorigin="anonymous">
 
 <script>
 function myFunction(evt) {
-    var container = evt.path[3].children[1];
+    var container = evt.target;
+    var index;
+    while(container)
+    {
+      var container_args = container.className.split(' ');
+      if(container_args[0] == 'panel')
+      {
+        break;
+      }
+      container = container.parentNode; 
+    }
+    for (index=0; index < container.children.length; index=index+1)
+    {
+      if(container.children[index].className.split(' ')[0] =='panel-body')
+      {
+        container = container.children[index];
+        break;
+      }
+    }
+    //var container = evt.path[3].children[1];
     if(container.style.maxHeight==="")
     {
       container.style.maxHeight="300px";
@@ -28,6 +47,27 @@ function myFunction(evt) {
       container.style.maxHeight="";
       evt.target.textContent="-";
     }
+}
+
+function loadContentLink(evt)
+{
+var url = evt.currentTarget.href;
+fetch(url+'&no_header',
+{
+  credentials: 'include'
+  }).then(function(responseObj)
+  {
+    return responseObj.text();
+  },function(err)
+  {
+    var content = document.getElementById("alerts-content").innerText=err;
+  }
+  ).then(function(text) 
+  {
+    var content = document.getElementById("content");
+    content.innerHTML=text;
+  });
+  return false;
 }
 
 function loadMoreLink(evt)
@@ -111,9 +151,9 @@ return false;
         <li class="dropdown">
         <a href="#" class="active" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Feed <span class="caret"></span></a>
         <ul class="dropdown-menu">
-            <li><a href="{{ base_url }}">Alll</a></li>
-            <li><a href="{{ base_url }}?liked">Liked</a></li>
-            <li><a href="{{ base_url }}feeds">Feeds</a></li>
+            <li><a href="{{ base_url }}?" onclick="return loadContentLink(event)">Alll</a></li>
+            <li><a href="{{ base_url }}?liked" onclick="return loadContentLink(event)">Liked</a></li>
+            <li><a href="{{ base_url }}feeds?" onclick="return loadContentLink(event)">Feeds</a></li>
         </ul>
         </li>
 {% else %} 
@@ -145,7 +185,9 @@ return false;
     </nav><!--/.navbar-collapse -->
   </div>
 </nav>
-<div id="content" style="margin-top:62px">
+<div id="alerts-content" style="margin-top:62px">
+</div>
+<div id="content">
 {% endif %}
 {% block content %}{% endblock %}
 
