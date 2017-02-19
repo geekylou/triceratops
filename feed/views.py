@@ -44,6 +44,16 @@ def action(request):
         
         resp = { "liked" : post.liked}
         response=json.dumps(resp)
+    
+    elif request.POST['action'] == 'delete' and request.user.is_authenticated:
+        post = Post.objects.filter(link=request.POST['link']).first()
+        #print(request.POST['link'])
+        #print(post.all())
+
+        resp = { "deleted" : post.safe_delete(request.user),
+                 "feed" : post.feed.get_url(),
+               }
+        response=json.dumps(resp)
     elif request.POST['action'] == 'post' and request.user.is_authenticated:
         print(request.POST)
         feed = Feed.objects.filter(link='local://'+request.user.get_username()).first()
@@ -89,11 +99,15 @@ def post(request,url):
     if 'action' in request.POST and request.POST['action'] == 'update' and request.user.is_authenticated:
         post.content_type = request.POST['content_type']
         post.description = request.POST['description']
-        post.published = datetime.now()
+        post.title = request.POST['title']
         post.save()
     if 'json' in request.GET:
-        return HttpResponse(json.dumps({ "post": post.dict() }), content_type="application/json")
-    return HttpResponse(get_feed(request,feed))
+        output = json.dumps({ 
+            "post": post.dict(),
+            "html": get_feed(request,feed,template = loader.get_template('feed/templates/post.html')),
+        })
+        return HttpResponse(output, content_type="application/json")
+    return HttpResponse(get_feed(request,feed,template = loader.get_template('feed/templates/post.html')))
 
 def feed(request,url):
     if 'action' in request.POST:
@@ -110,12 +124,11 @@ def index(request):
     feed = Post.objects.filter(feed__enabled=True).order_by('-published')
     return HttpResponse(get_feed(request,feed))
     
-def get_feed(request,feed_query):
+def get_feed(request,feed_query,template = loader.get_template('feed/templates/index.html')):
     args = ''
     increment_amount = 10;
     max_items = 25
     feed_items = []
-    template = loader.get_template('feed/templates/index.html')
     
     if not request.user.is_authenticated:
         feed_query = feed_query.filter(feed__public=True)

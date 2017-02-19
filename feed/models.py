@@ -24,6 +24,11 @@ class Feed(models.Model):
         else:
             return self.link
 
+    def get_url(self):
+        if self.link.startswith('local://'):
+            return rss_test.settings.BASE_URL+'feed/'+self.link[8:]
+        else:
+            return self.link
 @python_2_unicode_compatible
 class Post(models.Model):
     feed = models.ForeignKey(
@@ -57,7 +62,16 @@ class Post(models.Model):
             return self.link
             
     def is_editable(self):
-        return(self.link.startswith('local://') and self.content_type=='text/x-markdown')
+        return (self.link.startswith('local://') and self.content_type=='text/x-markdown')
+    
+    def _is_editable(self,user):
+        return is_editable(self)
+        
+    def safe_delete(self,user):
+        if self.link.startswith('local://'):
+            self.delete();
+            return True
+        return False
         
     def __str__(self):
         if self.title != "":
