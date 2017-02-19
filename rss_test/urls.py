@@ -19,12 +19,13 @@ from django.contrib import admin
 import feed.views
 
 urlpatterns = [
-    url(r'^$', feed.views.index, name='index'),
-    url(r'^action$', feed.views.action, name='action'),
-    url(r'^upload$', feed.views.upload, name='upload'),
-    url(r'^feeds$', feed.views.feeds, name='feeds'),
-    url(r'^post/(?P<url>[\w\-]+)$', feed.views.post, name='post'),
-    url(r'^feed/(?P<url>[\w\-]+)$', feed.views.feed, name='feed'),
-    url(r'^base$', feed.views.base, name='base'),
-    url(r'^admin/', admin.site.urls),
+    url(r'^rss/$', feed.views.index, name='index'),
+    url(r'^rss/action$', feed.views.action, name='action'),
+    url(r'^rss/upload$', feed.views.upload, name='upload'),
+    url(r'^rss/feeds$', feed.views.feeds, name='feeds'),
+    url(r'^rss/post/(?P<url>[\w\-]+)$', feed.views.post, name='post'),
+    url(r'^rss/feed/(?P<url>[\w\-]+)$', feed.views.feed, name='feed'),
+    url(r'^rss/base$', feed.views.base, name='base'),
+    url(r'^rss/admin/', admin.site.urls),
 ]
+admin.site.site_url = '/rss'
