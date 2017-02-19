@@ -3,6 +3,9 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 
+import markdown2
+import rss_test.settings
+
 # Create your models here.
 
 @python_2_unicode_compatible
@@ -12,6 +15,7 @@ class Feed(models.Model):
     link = models.CharField(max_length=255)
     url = models.CharField(max_length=255,blank=True) # link to the web site stored in the rss feed
     description = models.TextField(blank=True)
+    description_type = models.CharField(default="text/plain",max_length=64)
     public      = models.BooleanField(default=False)
     enabled     = models.BooleanField(default=True)
     def __str__(self):
@@ -31,14 +35,42 @@ class Post(models.Model):
     link = models.CharField(primary_key=True,max_length=255)
     description = models.TextField(blank=True)
     liked       = models.BooleanField(default=False)
+    content_type = models.CharField(default="text/html",max_length=64)
     
+    def html(self):
+        if self.content_type=='text/x-markdown':
+            return markdown2.markdown(self.description)
+        elif self.content_type=='text/html':
+            return self.description
+        return "<b>Error: Cannot process data!<b>";
+    
+    def get_title(self):
+        if self.title=="":
+            return self.description.split('\n')[0]
+        else:
+            return self.title
+            
+    def get_url(self):
+        if self.link.startswith('local://'):
+            return rss_test.settings.BASE_URL+'post/'+self.link[8:]
+        else:
+            return self.link
+            
+    def is_editable(self):
+        return(self.link.startswith('local://') and self.content_type=='text/x-markdown')
+        
     def __str__(self):
         if self.title != "":
             ret = self.title
         else:
             ret = self.link
         return ret
-
+    def dict(self):
+        return {
+            'description': self.description,
+            'description_type': self.content_type,
+            'title': self.title,
+        }
 @python_2_unicode_compatible
 class TagName(models.Model):
     name = models.CharField(primary_key=True,max_length=255)

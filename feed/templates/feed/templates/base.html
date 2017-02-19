@@ -1,21 +1,37 @@
 {% if header %}
 <!DOCTYPE html>
 <html>
+{% block header %}
+{% endblock %}
+<link rel="manifest" href="/manifest.json">
 <body>
 
 <!-- Latest compiled and minified CSS -->
-<link rel="stylesheet"
-href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
-crossorigin="anonymous">
+<link rel="stylesheet" href="/static/css/bootstrap.min.css">
 
 <!-- Optional theme -->
-<link rel="stylesheet"
-href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
-integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
-crossorigin="anonymous">
+<link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
+
+<!-- Include stylesheet -->
+<link href="/static/simplemde.min.css" rel="stylesheet">
+<!-- Include the Quill library -->
+<script src="/static/simplemde.min.js"></script>
 
 <script>
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js').then(
+  function(registration) {
+    console.log("success!");
+    if (registration.installing) {
+      registration.installing.postMessage("Howdy from your installing page.");
+    }
+  },
+  function(why) {
+    console.error("Installing the worker failed!:", why);
+  });
+}
+
 function myFunction(evt) {
     var container = evt.target;
     var index;
@@ -49,6 +65,13 @@ function myFunction(evt) {
     }
 }
 
+function showOfflineAlert(err)
+{
+    var content = document.getElementById("alerts-content");  
+    content.innerHTML='<div class="alert alert-danger" role="alert">'+err+'</div>';
+    return "";
+}
+
 function loadContentLink(evt)
 {
 var url = evt.currentTarget.href;
@@ -57,11 +80,9 @@ fetch(url+'&no_header',
   credentials: 'include'
   }).then(function(responseObj)
   {
+    document.getElementById("alerts-content").innerHTML='';
     return responseObj.text();
-  },function(err)
-  {
-    var content = document.getElementById("alerts-content").innerText=err;
-  }
+  },showOfflineAlert
   ).then(function(text) 
   {
     var content = document.getElementById("content");
@@ -80,7 +101,7 @@ fetch(url+'&no_header',
 {
   //console.log('status: ', responseObj.status);
   return responseObj.text();
-}).then(function(text) 
+},showOfflineAlert).then(function(text) 
 {
   //console.log('html: ', text);
   var overflow = document.getElementById("overflow");
@@ -107,8 +128,6 @@ fetch('{{ base_url }}action', {
     console.log('status: ', responseObj.status);
     responseObj.text().then(function(text)
     {
-      console.log(evt);
-      console.log(form);
       console.log('html: ', text);
     });
   }
@@ -129,8 +148,87 @@ fetch('{{ base_url }}action', {
       form[0].value="1";
     }
   });  
-});
+},showOfflineAlert);
 return false;
+}
+
+var editor = (
+    function() {
+    var editor_url = '{{ base_url }}action';
+    var update = false;
+    function sendPost(evt)
+    {
+        var form=evt.currentTarget.parentNode.parentNode.parentNode;
+        
+        var form_data = new FormData(form);
+        
+        if (update)
+        {
+            form_data.set('action','update');
+        }
+        
+        form_data.set('description',simplemde.value());
+        fetch(editor_url, {
+        method: 'post',
+        credentials: 'include',
+        body: form_data,
+     }).then(function(responseObj) 
+    {
+        responseObj.json().then(function(text)
+        {
+          console.log('html: ', text);
+          var next_div = document.createElement("div");
+          var content = document.getElementById("content");
+          next_div.innerHTML=text['html'];
+          content.insertBefore(next_div, content.firstChild);
+          simplemde.value("");
+        });
+    },showOfflineAlert);
+    return false;
+    }
+
+    function editPost(evt)
+    {
+        var form=evt.currentTarget.parentNode;
+        
+        var form_data = new FormData(form);
+        fetch(form.action.formAction+'?json', {
+        method: 'post',
+        credentials: 'include',
+        body: form_data,
+     }).then(function(responseObj) 
+    {
+        responseObj.json().then(function(text)
+        {
+          console.log('html: ', text);
+          document.getElementById('editor-submit-button').text = ' Update';
+          document.getElementById('editor-panel').style.display = 'block';
+          simplemde.value(text.post.description);
+
+          update = true;
+          editor_url = form.action.formAction;
+          // show editor
+          //form.style.display = 'none';
+
+        });
+    },showOfflineAlert);
+    return false;
+    }
+    
+    return {
+    editPost: function(evt) {
+      editPost(evt);
+    },
+    sendPost: function(evt) {
+     sendPost(evt);
+    }
+
+    };
+    })();
+    
+function sendPost(evt)
+{
+   editor.sendPost(evt);
 }
 </script>
 
@@ -152,7 +250,8 @@ return false;
         <a href="#" class="active" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Feed <span class="caret"></span></a>
         <ul class="dropdown-menu">
             <li><a href="{{ base_url }}?" onclick="return loadContentLink(event)">Alll</a></li>
-            <li><a href="{{ base_url }}?liked" onclick="return loadContentLink(event)">Liked</a></li>
+            <li><a href="{{ base_url }}?liked" onclick="return loadContentLink(event)">Pinned</a></li>
+            <li><a href="{{ base_url }}feed/{{ request.user.username }}?" onclick="return loadContentLink(event)">Local</a></li>
             <li><a href="{{ base_url }}feeds?" onclick="return loadContentLink(event)">Feeds</a></li>
         </ul>
         </li>
@@ -163,7 +262,7 @@ return false;
       
       <div id="login_form">
       {% if login %}
-            <form class="navbar-form navbar-right" method="post" action="">
+            <form class="navbar-form navbar-right" method="post" action="{{ base_url }}">
 	    {% csrf_token %}
             <input type="hidden" name="action" value="logout">
             <button id="logout-submit" type="submit" class="btn btn-success">Sign Out</button>
@@ -187,17 +286,47 @@ return false;
 </nav>
 <div id="alerts-content" style="margin-top:62px">
 </div>
+<!-- Editor we keep this around as loading it is quite slow! -->
+{% if login %}
+<form action="" method="post" id="editor-panel" style="display:none">
+<input type="hidden" name="action" value="post">
+<input type="hidden" name="content_type" value="text/x-markdown">
+{% csrf_token %}
+<div class="panel panel-default" style="margin-left:50px;margin-right:50px;margin-top:5px;">
+<div class="panel-heading">
+	 <h3 class="panel-title"> 
+	 <button type="button" onclick="myFunction(event)">+</button>
+	 <a href="{{ item.feed.url }}">{{ item.feed.title|safe }}</a>:
+         Title <input type="text" name="title"></h3>
+	 </div>
+<div class="panel-body">
+  <textarea name="description" id="editor"></textarea>
+</div>
+<div class="panel-footer">
+<button type="button" class="btn btn-primary btn-sm" id="editor-submit-button" onclick="return sendPost(event);">
+  <span class="glyphicon glyphicon-save" aria-hidden="true"></span> Post 
+</button>
+</div>
+</div>
+</form>
+{% endif %}
 <div id="content">
 {% endif %}
-{% block content %}{% endblock %}
+{% block content %}
+<div class="alert alert-warning" role="alert">Warning offline, using
+cached pages rather then live pages.</div>
+{% endblock %}
 
 {% if header %}
 </div>
-
+<script>
+console.log("init editor");
+var simplemde = new SimpleMDE({ element: document.getElementById("editor") });
+</script>
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="/static/jquery.min.js"></script>
 <!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/static/js/bootstrap.min.js"></script>
 </body>
 </html>
 {% endif %}

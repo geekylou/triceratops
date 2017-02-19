@@ -29,7 +29,7 @@ with open('../secret_key.txt') as f:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['house-nas','127.0.0.1']
+ALLOWED_HOSTS = ['house-nas','127.0.0.1','house-nas.geekylou.me.uk']
 
 
 # Application definition
@@ -129,10 +129,13 @@ USE_L10N = True
 
 USE_TZ = True
 
-BASE_URL = '/'
+BASE_URL = '/rss/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
-#STATIC_ROOT = '../static'
+STATIC_ROOT = '/var/www/html/static'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT =  '/var/www/html/media'

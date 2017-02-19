@@ -21,6 +21,10 @@ import feed.views
 urlpatterns = [
     url(r'^$', feed.views.index, name='index'),
     url(r'^action$', feed.views.action, name='action'),
+    url(r'^upload$', feed.views.upload, name='upload'),
     url(r'^feeds$', feed.views.feeds, name='feeds'),
+    url(r'^post/(?P<url>[\w\-]+)$', feed.views.post, name='post'),
+    url(r'^feed/(?P<url>[\w\-]+)$', feed.views.feed, name='feed'),
+    url(r'^base$', feed.views.base, name='base'),
     url(r'^admin/', admin.site.urls),
 ]
