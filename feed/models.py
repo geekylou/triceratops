@@ -44,7 +44,7 @@ class Post(models.Model):
     
     def html(self):
         if self.content_type=='text/x-markdown':
-            return markdown2.markdown(self.description)
+            return markdown2.markdown(self.description,extras=['nofollow','fenced-code-blocks'])
         elif self.content_type=='text/html':
             return self.description
         return "<b>Error: Cannot process data!<b>";
