@@ -29,11 +29,12 @@ from feed.models import *
 txt=""
 
 for feed in Feed.objects.all():
-  print("Getting rss feed "+feed.link)
-  try:
+  if (not feed.link.startswith('local://')):
+    print("Getting rss feed "+feed.link)
+    try:
       d = feedparser.parse(feed.link)
   
-      #print(d['feed'])
+      print(d['feed'])
   
       # We want the defualt more restrictive filters for the title.
       feed.title = bleach.clean(d['feed']['title'])
@@ -64,6 +65,6 @@ for feed in Feed.objects.all():
           post.description = filter(item['description'])
           txt=filter(item['description'])
         post.save()
-  except Exception:
-     traceback.print_exc(file=sys.stderr)
-     print(txt)
+    except Exception:
+      traceback.print_exc(file=sys.stderr)
+      print(txt)
