@@ -70,21 +70,25 @@ function myFunction(evt) {
 function loadContentLink(evt)
 {
 var url = evt.currentTarget.href;
-fetch(addArguments(url,'&no_header'),
-{
-  credentials: 'include'
-  }).then(function(responseObj)
+if (url.startsWith(window.location.origin+'/rss'))
   {
-    document.getElementById("alerts-content").innerHTML='';
-    return responseObj.text();
-  },showOfflineAlert
-  ).then(function(text) 
-  {
-    var content = document.getElementById("content");
-    content.innerHTML=text;
-    editor.setVisibility(false);
-  });
-  return false;
+    fetch(addArguments(url,'&no_header'),
+    {
+      credentials: 'include'
+    }).then(function(responseObj)
+    {
+      document.getElementById("alerts-content").innerHTML='';
+      return responseObj.text();
+    },showOfflineAlert
+    ).then(function(text) 
+    {
+      var content = document.getElementById("content");
+      content.innerHTML=text;
+      editor.setVisibility(false);
+    });
+    return false;
+  }
+  return true;
 }
 
 function loadMoreLink(evt)

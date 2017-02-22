@@ -5,8 +5,8 @@
 <div class="panel-heading">
 	 <h3 class="panel-title"> 
 	 <button onclick="myFunction(event)">+</button>
-	 <a href="{{ item.feed.get_url }}" onclick="return loadContentLink(event)">{{ item.feed.title|safe }}</a>:
-         <a href="{{ item.get_url }}" onclick="return loadContentLink(event)">{{item.get_title|safe }}</a></h3>
+	 <a href="{{ item.feed.get_url }}" onclick="return loadContentLink(event)" rel="noopener noreferrer nofollow" target="_blank">{{ item.feed.title|safe }}</a>:
+<a href="{{ item.get_url }}" onclick="return loadContentLink(event)" rel="noopener noreferrer nofollow" target="_blank">{{item.get_title|safe }}</a></h3>
 	 </div>
 <div class="panel-body" style="max-height:300px;overflow:hidden;margin-right:15px;margin-bottom: 15px">
 {{ item.html|safe }}
