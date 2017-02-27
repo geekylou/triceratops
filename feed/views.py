@@ -14,7 +14,7 @@ import json
 import uuid
 
 @login_required
-@csrf_exempt
+#@csrf_exempt
 def upload(request):
     print(request.FILES)
     fs = FileSystemStorage()
@@ -129,13 +129,21 @@ def get_feed(request,feed_query,template = loader.get_template('feed/templates/i
     increment_amount = 10;
     max_items = 25
     feed_items = []
-    
+
+    print(request.is_secure())
+    print(request.META)
     if not request.user.is_authenticated:
         feed_query = feed_query.filter(feed__public=True)
     else:
         if 'liked' in request.GET:
             feed_query = feed_query.filter(liked=True)
             args = '&liked'
+    
+    if 'search' in request.GET:
+        #feed_query = feed_query.filter(description__search=request.GET['search'])
+        feed_query = feed_query.filter(search_vector_description=request.GET['search'])
+        print("search:");print(request.GET['search']);
+        args = args + '&search=' + request.GET['search']
     if 'increment_amount' in request.GET:
         increment_amount = int(request.GET['increment_amount'])
         

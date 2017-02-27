@@ -11,7 +11,7 @@
 {% for item in feeds %}
 <tr>
 <td>
-	 <a href="{{ item.url }}">{{ item.title|safe }}</a>
+	 <a href="{{ item.url }}">{{ item|safe }}</a>
 </td>
 <td>
     <input type="checkbox" {% if item.enabled %}checked{% endif %}>

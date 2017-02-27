@@ -16,7 +16,7 @@ function showOfflineAlert(err)
     content.innerHTML='<div class="alert alert-danger" role="alert">'+err+'</div>';
     return "";
 }
-
+ 
 function showDismissibleAlert(type,message)
 {
     var content = document.getElementById("alerts-content");  
@@ -32,6 +32,21 @@ function addArguments(uri,args)
         return uri+'&'+args;
     }
     return uri+'?'+args;
+}
+
+function find_tag(tag,tag_name)
+{
+  var container = tag;
+  while(container)
+  {
+    var container_args = container.className.split(' ');
+    if(container_args[0] == tag_name)
+    {
+      return container;
+    }
+    container = container.parentNode; 
+  }
+  return undefined;
 }
 
 function myFunction(evt) {
@@ -85,6 +100,7 @@ if (url.startsWith(window.location.origin+'/rss'))
       var content = document.getElementById("content");
       content.innerHTML=text;
       editor.setVisibility(false);
+      editor.reset();
     });
     return false;
   }
@@ -152,11 +168,25 @@ function likeLink(evt)
 return false;
 }
 
+function toggleEditor(event)
+{
+  editor.toggleVisibility(true);
+}
+
 var editor = (
     function() {
     var editor_url = base_url+'action';
     var update = false;
     var visible_after_post = true;
+    var reset_editor = false;
+    function reset()
+    {
+        editor_url = base_url+'action';
+        update = false;
+	visible_after_post = true;
+	reset_editor = true;
+    }
+    
     function sendPost(evt)
     {
         var form=evt.currentTarget.parentNode.parentNode.parentNode;
@@ -203,6 +233,7 @@ var editor = (
     {
         responseObj.json().then(function(text)
         {
+	  reset_editor = false; // Don't reset the editor when it becomes visible!
           console.log('html: ', text);
           var editor_submit_button = document.getElementById('editor-submit-button');
           editor_submit_button.innerHTML = '<span class="glyphicon glyphicon-save" aria-hidden="true"></span> Update';
@@ -227,11 +258,24 @@ var editor = (
         if (visible)
         {
              document.getElementById('editor-panel').style.display = 'block';
+	     if (reset_editor)
+	     {
+	       simplemde.value("");
+	       var editor_submit_button = document.getElementById('editor-submit-button');
+	       editor_submit_button.innerHTML = '<span class="glyphicon glyphicon-save" aria-hidden="true"></span> Post';
+	       document.getElementById('editor-title').value="";
+	       reset_editor = false;
+	     }
         }
         else
         {
             document.getElementById('editor-panel').style.display = 'none';
         }
+    }
+
+    function toggleVisibility()
+    {
+       setVisibility(document.getElementById('editor-panel').style.display=='none');
     }
     
     return {
@@ -243,8 +287,13 @@ var editor = (
     },
     setVisibility: function(visible) {
      setVisibility(visible);
+    },
+    toggleVisibility: function() {
+     toggleVisibility();
+    },
+    reset: function() {
+     reset();
     }
-    
     };
     })();
     

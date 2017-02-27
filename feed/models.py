@@ -2,9 +2,14 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
+from django.contrib.postgres.search import SearchVectorField 
 
 import markdown2
 import rss_test.settings
+
+def update_indexes():
+    Post.objects.update(search_vector_description=SearchVector('title'))
+    Post.objects.update(search_vector_description=SearchVector('description'))
 
 # Create your models here.
 
@@ -41,6 +46,7 @@ class Post(models.Model):
     description = models.TextField(blank=True)
     liked       = models.BooleanField(default=False)
     content_type = models.CharField(default="text/html",max_length=64)
+    search_vector_description = SearchVectorField(description)
     
     def html(self):
         if self.content_type=='text/x-markdown':
@@ -85,6 +91,7 @@ class Post(models.Model):
             'description_type': self.content_type,
             'title': self.title,
         }
+
 @python_2_unicode_compatible
 class TagName(models.Model):
     name = models.CharField(primary_key=True,max_length=255)

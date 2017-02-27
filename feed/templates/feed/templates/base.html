@@ -43,8 +43,15 @@
 {% else %} 
          <li class="active" id="navbar_home"><a>Feed</a></li>
 {% endif %}
-      </ul>
       
+      <li onclick="return toggleEditor(event)"><a>New Post</a></li>
+      </ul>
+      <form class="navbar-form navbar-left">
+        <div class="form-group">
+          <input name="search" type="text" class="form-control"  placeholder="Search">
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form return>
       <div id="login_form">
       {% if login %}
             <form class="navbar-form navbar-right" method="post" action="{{ base_url }}">
@@ -105,8 +112,6 @@ cached pages rather then live pages.</div>
 {% if header %}
 </div>
 <script>
-console.log("init editor");
-var simplemde = new SimpleMDE({ element: document.getElementById("editor") });
 var base_url = '{{ base_url }}';
 </script>
 <script src="/static/feed/base.js"></script>
@@ -115,6 +120,10 @@ var base_url = '{{ base_url }}';
 <script src="/static/jquery.min.js"></script>
 <!-- Latest compiled and minified JavaScript -->
 <script src="/static/js/bootstrap.min.js"></script>
+<script>
+console.log("init editor");
+var simplemde = new SimpleMDE({ element: document.getElementById("editor") });
+</script>
 </body>
 </html>
 {% endif %}
