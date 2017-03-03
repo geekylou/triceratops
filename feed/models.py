@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
-from django.contrib.postgres.search import SearchVectorField 
+from django.contrib.postgres.search import SearchVectorField,SearchVector
 
 import markdown2
 import rss_test.settings
