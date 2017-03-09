@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^rss/feeds$', feed.views.feeds, name='feeds'),
     url(r'^rss/post/(?P<url>[\w\-]+)$', feed.views.post, name='post'),
     url(r'^rss/feed/(?P<url>[\w\-]+)$', feed.views.feed, name='feed'),
+    url(r'^rss/tag/(?P<tag_name>.+)$', feed.views.tag, name='tag'),
     url(r'^rss/base$', feed.views.base, name='base'),
     url(r'^rss/admin/', admin.site.urls),
 ]
