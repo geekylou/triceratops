@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.contrib.postgres.search import SearchVectorField,SearchVector
+from django.contrib.postgres.fields import JSONField,ArrayField
 
 import markdown2
 import rss_test.settings
@@ -46,6 +47,9 @@ class Post(models.Model):
     description = models.TextField(blank=True)
     liked       = models.BooleanField(default=False)
     content_type = models.CharField(default="text/html",max_length=64)
+    metadata = JSONField(default="")
+    tags = ArrayField(models.CharField(max_length=128, blank=True),default=[])
+    
     search_vector_description = SearchVectorField(description)
     
     def html(self):

@@ -48,7 +48,6 @@ for feed in Feed.objects.all():
         feed.description = filter(d['feed']['description'])
       feed.save()
       for item in d['entries']:
-        #print(item)
         #print(item['title'])
         #item['published'],item['link'])
         
@@ -64,6 +63,12 @@ for feed in Feed.objects.all():
         if 'description' in item:    
           post.description = filter(item['description'])
           txt=filter(item['description'])
+        if 'tags' in item:
+          tag_list = []
+          for tag in item['tags']:
+            tag_list.append(tag.term)
+          post.tags = tag_list
+        post.metadata=item
         post.save()
     except Exception:
       traceback.print_exc(file=sys.stderr)
