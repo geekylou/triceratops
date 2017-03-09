@@ -68,3 +68,5 @@ for feed in Feed.objects.all():
     except Exception:
       traceback.print_exc(file=sys.stderr)
       print(txt)
+      
+update_indexes()
