@@ -117,6 +117,13 @@ def feed(request,url):
     feed = Post.objects.filter(feed__enabled=True).filter(feed__link=url).order_by('-published')
     return HttpResponse(get_feed(request,feed))
     
+def tag(request,tag_name):
+    if 'action' in request.POST:
+        action(request)
+    
+    feed = Post.objects.filter(feed__enabled=True).filter(tags__contains=[tag_name]).order_by('-published')
+    return HttpResponse(get_feed(request,feed))
+    
 def index(request):
     if 'action' in request.POST:
         action(request)
