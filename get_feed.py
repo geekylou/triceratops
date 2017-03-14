@@ -37,9 +37,12 @@ for feed in Feed.objects.all():
       print(d['feed'])
   
       # We want the defualt more restrictive filters for the title.
-      feed.title = bleach.clean(d['feed']['title'])
-      feed.url   = bleach.clean(d['feed']['link'])
-  
+      if 'title' in d['feed']:
+        feed.title = bleach.clean(d['feed']['title'])
+      if 'link' in d['feed']:
+        feed.url   = bleach.clean(d['feed']['link'])
+      else:
+        sys.stderr.write(str(feed)+"\n")
       if 'published_parsed' in d['feed']:
         feed.updated = datetime.fromtimestamp(timegm(d['feed']['published_parsed']),tz=tz.tzutc())
       elif 'updated_parsed' in d['feed']:
@@ -55,23 +58,31 @@ for feed in Feed.objects.all():
         if post_query.exists():
             post = post_query.first()
         else:
-            post = Post(feed=feed,title=bleach.clean(item['title']), link=item['link'])
+            title=""
+            if 'title' in item:
+                title=item['title']
+            post = Post(feed=feed,title=bleach.clean(title), link=item['link'])
         if 'published_parsed' in item:
           post.published = datetime.fromtimestamp(timegm(item['published_parsed']),tz=tz.tzutc())
         elif 'updated_parsed' in item:
           post.published = datetime.fromtimestamp(timegm(item['updated_parsed']),tz=tz.tzutc())
         if 'description' in item:    
-          post.description = filter(item['description'])
+          post.description = item['description']
           txt=filter(item['description'])
         if 'tags' in item:
           tag_list = []
           for tag in item['tags']:
-            tag_list.append(tag.term)
+            tag_list.append(tag.term[0:128])
           post.tags = tag_list
         post.metadata=item
-        post.save()
+        print("Metadata");print(post.metadata)
+        try:
+          post.save()
+        except Exception:
+          #sys.stderr.write(str(post.metadata))
+          traceback.print_exc(file=sys.stderr)
     except Exception:
       traceback.print_exc(file=sys.stderr)
-      print(txt)
+      sys.stderr.write(txt)
       
 update_indexes()

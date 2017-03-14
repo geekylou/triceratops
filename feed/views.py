@@ -60,6 +60,7 @@ def action(request):
         
         post = Post(feed=feed,title='', link='local://'+str(uuid.uuid4()))
         post.content_type = request.POST['content_type']
+        post.title = request.POST['title']
         post.description = request.POST['description']
         post.published = datetime.now()
         post.save()

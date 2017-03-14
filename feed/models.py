@@ -4,14 +4,26 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.contrib.postgres.search import SearchVectorField,SearchVector
 from django.contrib.postgres.fields import JSONField,ArrayField
+from django.conf import settings
 
 import markdown2
 import rss_test.settings
+import bleach
 
 def update_indexes():
     Post.objects.update(search_vector_description=SearchVector('title'))
     Post.objects.update(search_vector_description=SearchVector('description'))
 
+BLEACH_ATTR = bleach.ALLOWED_ATTRIBUTES.copy()
+BLEACH_ATTR['img'] = ['src']
+BLEACH_ATTR['time'] = ['*']
+
+def filter(data):
+    return bleach.clean(
+        data,
+        tags=bleach.ALLOWED_TAGS+['img','br','p','h4','h5','h6','span','time','figure','sup'],
+        attributes=BLEACH_ATTR)
+    
 # Create your models here.
 
 @python_2_unicode_compatible
@@ -56,7 +68,7 @@ class Post(models.Model):
         if self.content_type=='text/x-markdown':
             return markdown2.markdown(self.description,extras=['nofollow','fenced-code-blocks'])
         elif self.content_type=='text/html':
-            return self.description
+            return filter(self.description)
         return "<b>Error: Cannot process data!<b>";
     
     def get_title(self):
@@ -99,6 +111,9 @@ class Post(models.Model):
 @python_2_unicode_compatible
 class TagName(models.Model):
     name = models.CharField(primary_key=True,max_length=255)
+
+    def __str__(self):
+        return name
     
 @python_2_unicode_compatible
 class Tag(models.Model):
@@ -110,3 +125,7 @@ class Tag(models.Model):
     TagName,
     on_delete=models.CASCADE,
     )
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    
+    #def __str__(self):
+        
