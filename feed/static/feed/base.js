@@ -102,6 +102,7 @@ if (url.startsWith(window.location.origin+'/rss'))
       editor.setVisibility(false);
       editor.reset();
     });
+    history.replaceState( {} , 'rss', url );
     return false;
   }
   return true;

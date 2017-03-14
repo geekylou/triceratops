@@ -3,6 +3,7 @@
 <html>
 {% block header %}
 {% endblock %}
+<title>BLOB RSS Reader</title>
 <link rel="manifest" href="/manifest.json">
 <body>
 
@@ -36,7 +37,7 @@
         <ul class="dropdown-menu">
             <li><a href="{{ base_url }}" onclick="return loadContentLink(event)">Alll</a></li>
             <li><a href="{{ base_url }}?liked" onclick="return loadContentLink(event)">Pinned</a></li>
-            <li><a href="{{ base_url }}feed/{{ request.user.username }}?" onclick="return loadContentLink(event)">Local</a></li>
+            <li><a href="{{ base_url }}feed/{{ request.user.username }}" onclick="return loadContentLink(event)">Local</a></li>
             <li><a href="{{ base_url }}feeds" onclick="return loadContentLink(event)">Feeds</a></li>
         </ul>
         </li>
