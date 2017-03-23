@@ -14,7 +14,7 @@ function showOfflineAlert(err)
 {
     var content = document.getElementById("alerts-content");  
     content.innerHTML='<div class="alert alert-danger" role="alert">'+err+'</div>';
-    return "";
+    return null;
 }
  
 function showDismissibleAlert(type,message)
@@ -108,8 +108,16 @@ if (url.startsWith(window.location.origin+'/rss'))
   return true;
 }
 
+var next_div=null;
+
 function loadMoreLink(evt)
 {
+  if (next_div === null)
+  {
+      next_div = document.createElement("div");
+      var feed = document.getElementById("content");
+      feed.appendChild(next_div);
+  }
 var url = document.getElementById("nextUrl").href;
 fetch(url+'&no_header',
 {
@@ -121,12 +129,13 @@ fetch(url+'&no_header',
 },showOfflineAlert).then(function(text) 
 {
   //console.log('html: ', text);
-  var overflow = document.getElementById("overflow");
-  var feed = document.getElementById("content");
-  overflow.parentNode.removeChild(overflow);
-  var next_div = document.createElement("div");
-  next_div.innerHTML=text;
-  feed.appendChild(next_div);
+  if (next_div !== null && text !== null)
+  {
+    var overflow = document.getElementById("overflow");
+    next_div.innerHTML=text;
+    next_div=null;
+    overflow.parentNode.removeChild(overflow);
+  }
 });
 return false;
 }
