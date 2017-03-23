@@ -1,0 +1,18 @@
+{
+  "short_name": "Blob RT",
+  "name": "Blob RT rss reader and microblogging server.",
+  "icons": [
+    {
+      "src": "/static/ic_launcher.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/ic_launcher-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/rss",
+  "display": "standalone"
+}
