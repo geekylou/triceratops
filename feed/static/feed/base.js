@@ -180,6 +180,7 @@ return false;
 
 function toggleEditor(event)
 {
+  editor.reset();
   editor.toggleVisibility(true);
 }
 
