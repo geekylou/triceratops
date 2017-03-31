@@ -21,7 +21,7 @@ BLEACH_ATTR['time'] = ['*']
 def filter(data):
     return bleach.clean(
         data,
-        tags=bleach.ALLOWED_TAGS+['img','br','p','h4','h5','h6','span','time','figure','sup'],
+        tags=bleach.ALLOWED_TAGS+['img','br','p','h1','h2','h3','h4','h5','h6','span','time','figure','sup'],
         attributes=BLEACH_ATTR)
     
 # Create your models here.
@@ -73,7 +73,11 @@ class Post(models.Model):
     
     def get_title(self):
         if self.title=="":
-            return self.description.split('\n')[0]
+            title = "<no-title>"
+            for line in self.description.split('\n'):
+                if line != "":
+                    title = line
+            return title
         else:
             return self.title
             
