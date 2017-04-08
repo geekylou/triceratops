@@ -17,7 +17,7 @@ BLEACH_ATTR['time'] = ['*']
 def filter(data):
     return bleach.clean(
        data,
-       tags=bleach.ALLOWED_TAGS+['img','br','p','h4','h5','h6','span','time'],
+       tags=bleach.ALLOWED_TAGS+['img','br','p','h4','h5','h6','span','time','sup'],
        attributes=BLEACH_ATTR)
 
 #os.exit(0)

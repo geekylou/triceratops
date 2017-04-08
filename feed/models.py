@@ -49,6 +49,8 @@ class Feed(models.Model):
             return self.link
 @python_2_unicode_compatible
 class Post(models.Model):
+    class Meta:
+        ordering = ['-published']
     feed = models.ForeignKey(
     Feed,
     on_delete=models.CASCADE,
@@ -57,7 +59,8 @@ class Post(models.Model):
     published = models.DateTimeField(null=True,blank=True)
     link = models.CharField(primary_key=True,max_length=255)
     description = models.TextField(blank=True)
-    liked       = models.BooleanField(default=False)
+    
+    #liked = models.BooleanField(default=False)
     content_type = models.CharField(default="text/html",max_length=64)
     metadata = JSONField(default="")
     tags = ArrayField(models.CharField(max_length=128, blank=True),default=[])
@@ -98,7 +101,10 @@ class Post(models.Model):
             self.delete();
             return True
         return False
-        
+
+    def is_liked(self):
+        return self.liked
+    
     def __str__(self):
         if self.title != "":
             ret = self.title
@@ -112,24 +118,105 @@ class Post(models.Model):
             'title': self.title,
         }
 
+class FeedQuery:
+    def __init__(self,queryset,user,liked_query=None):
+        self.queryset = queryset
+        self.user = user
+        self.liked_queryset = liked_query
+        
+    def liked(self):
+        if self.liked_queryset == None and self.user.is_authenticated:
+            self.liked_queryset = PostGroupQuery(PostGroup.objects.filter(owner=self.user).filter(name="#like"))
+        return self.liked_queryset
+
+    def __getitem__(self, k):
+        return FeedQuery(self.queryset[k],self.user)
+        
+    def __len__(self):
+        return len(self.queryset)
+    
+    def __iter__(self):
+        if self.user.is_authenticated:
+            liked_posts = self.liked().queryset.values("post").values()
+            liked_set = frozenset(o['post_id'] for o in liked_posts)
+        else:
+            liked_set = frozenset([])
+            
+        for item in self.queryset:
+            item.liked=item.pk in liked_set
+            yield item
+            
+    def filter(self,**kwargs):
+        liked_queryset = None
+        if self.liked() != None:
+            liked_queryset = self.liked().filter(**kwargs)
+        return FeedQuery(self.queryset.filter(**kwargs),self.user,liked_query=liked_queryset)
+    
+    def first(self):
+        return self.__iter__().__next__()
+    
+    def all(self):
+        return list(self)
+    
+    def count(self):
+        return self.queryset.count()
+
+class PostGroupQuery:
+    def __init__(self,queryset):
+        self.queryset = queryset
+        
+    def __getitem__(self, k):
+        return PostGroupQuery(self.queryset[k])
+        
+    def __len__(self):
+        return len(self.queryset)
+    
+    def __iter__(self):
+        for item in self.queryset:
+            item.post.liked=True
+            yield item.post
+            
+    def filter(self,**kwargs):
+        args={}
+        for key, value in kwargs.items():
+            args["post__"+key]=value
+        return PostGroupQuery(self.queryset.filter(**args))
+    
+    def all(self):
+        return list(self)
+    
+    def first(self):
+        return  self.__iter__().__next__()
+    
+    def count(self):
+        return self.queryset.count()
+    
+    def order_by(self,arg):
+        if arg[0] == "-":
+            sign="-"
+            arg=arg[1:]
+        else:
+            sign=""
+        return PostGroupQuery(self.queryset.order_by(sign+"post__"+arg))
+            
 @python_2_unicode_compatible
-class TagName(models.Model):
+class PostGroupName(models.Model):
     name = models.CharField(primary_key=True,max_length=255)
 
     def __str__(self):
-        return name
+        return self.name
     
 @python_2_unicode_compatible
-class Tag(models.Model):
+class PostGroup(models.Model):
     post = models.ForeignKey(
     Post,
     on_delete=models.CASCADE,
     )
     name = models.ForeignKey(
-    TagName,
+    PostGroupName,
     on_delete=models.CASCADE,
     )
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     
-    #def __str__(self):
-        
+    def __str__(self):
+      return str(self.name)+":"+str(self.post)

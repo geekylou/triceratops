@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import FileSystemStorage
-from feed.models import Post,Feed
+from feed.models import Post,Feed,PostGroup,PostGroupName,PostGroupQuery,FeedQuery
 from calendar import timegm
 from datetime import datetime
 from dateutil import tz
@@ -22,6 +22,7 @@ def upload(request):
     uploaded_file_url = fs.url(filename)
 
     return HttpResponse(json.dumps({'location' : uploaded_file_url}), content_type="application/json")
+
 def action(request):
     response=""
     if request.POST['action'] == 'logout':
@@ -35,14 +36,19 @@ def action(request):
         else:
             response="login failed!"
     elif request.POST['action'] == 'like' and request.user.is_authenticated:
-        post = Post.objects.filter(link=request.POST['link'])
-        #print(request.POST['link'])
-        #print(post.all())
-        post = post.all()[0]
-        post.liked = request.POST['like']
-        post.save()
-        
-        resp = { "liked" : post.liked}
+        post_rec = Post.objects.filter(link=request.POST['link'])
+        tag_name = PostGroupName.objects.filter(name="#like")
+        if request.POST['like'] == '1':
+          print(post_rec.all())
+          print(tag_name.all())
+          tag = PostGroup.objects.create(post=post_rec.first(),owner=request.user,name=tag_name.first())
+          #tag.save()
+          print(tag)
+        elif request.POST['like'] == '0':
+          tag = PostGroup.objects.all().filter(owner=request.user).filter(name="#like").filter(post=post_rec.first())
+          print(tag.all())
+          tag.delete()
+        resp = { "liked" : request.POST['like'] == '1' }
         response=json.dumps(resp)
     
     elif request.POST['action'] == 'delete' and request.user.is_authenticated:
@@ -94,7 +100,7 @@ def feeds(request):
 
 def post(request,url):
     url="local://"+url
-    feed = Post.objects.filter(feed__enabled=True).filter(link=url)
+    feed = FeedQuery(Post.objects.filter(feed__enabled=True).filter(link=url),request.user)
     post = feed.first()
     
     if 'action' in request.POST and request.POST['action'] == 'update' and request.user.is_authenticated:
@@ -115,21 +121,21 @@ def feed(request,url):
         action(request)
         
     url="local://"+url
-    feed = Post.objects.filter(feed__enabled=True).filter(feed__link=url).order_by('-published')
+    feed = FeedQuery(Post.objects,request.user).filter(feed__enabled=True).filter(feed__link=url)
     return HttpResponse(get_feed(request,feed))
     
 def tag(request,tag_name):
     if 'action' in request.POST:
         action(request)
     
-    feed = Post.objects.filter(feed__enabled=True).filter(tags__contains=[tag_name]).order_by('-published')
+    feed = FeedQuery(Post.objects,request.user).filter(feed__enabled=True).filter(tags__contains=[tag_name])
     return HttpResponse(get_feed(request,feed))
     
 def index(request):
     if 'action' in request.POST:
         action(request)
         
-    feed = Post.objects.filter(feed__enabled=True).order_by('-published')
+    feed = FeedQuery(Post.objects,request.user).filter(feed__enabled=True)
     return HttpResponse(get_feed(request,feed))
     
 def get_feed(request,feed_query,template = loader.get_template('feed/templates/index.html')):
@@ -137,14 +143,17 @@ def get_feed(request,feed_query,template = loader.get_template('feed/templates/i
     increment_amount = 10;
     max_items = 25
     feed_items = []
-
+    
     print(request.is_secure())
     print(request.META)
     if not request.user.is_authenticated:
         feed_query = feed_query.filter(feed__public=True)
     else:
         if 'liked' in request.GET:
-            feed_query = feed_query.filter(liked=True)
+            feed_query = feed_query.liked().order_by("-published")
+            #PostGroupQuery(PostGroup.objects.filter(owner=request.user).filter(name__name="#like").order_by("-post__published"))
+#            
+#            print(list(PostGroup.objects.all()))
             args = '&liked'
     
     if 'search' in request.GET:
@@ -196,4 +205,4 @@ def base(request):
     if 'no_header' not in request.GET:
         context['header'] = True
     
-    return HttpResponse(template.render(context, request)) 
+    return HttpResponse(template.render(context, request))
