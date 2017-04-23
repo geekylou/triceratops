@@ -9,9 +9,10 @@ from feed.models import Post,Feed,PostGroup,PostGroupName,PostGroupQuery,FeedQue
 from calendar import timegm
 from datetime import datetime
 from dateutil import tz
-import rss_test.settings
+import triceratops.settings
 import json
 import uuid
+import django.contrib.auth
 
 @login_required
 #@csrf_exempt
@@ -23,6 +24,13 @@ def upload(request):
 
     return HttpResponse(json.dumps({'location' : uploaded_file_url}), content_type="application/json")
 
+def login(request):
+#    print("boop")
+    # context = RequestContext(request, {
+    #     'request': request, 'user': request.user})
+    # return render_to_response('login.html', context_instance=context)
+    return render(request, 'feed/templates/login.html')
+
 def action(request):
     response=""
     if request.POST['action'] == 'logout':
@@ -32,7 +40,7 @@ def action(request):
         password = request.POST['password']
         user = authenticate(username=username, password=password)
         if user is not None:
-            login(request, user)
+            django.contrib.auth.login(request, user)
         else:
             response="login failed!"
     elif request.POST['action'] == 'like' and request.user.is_authenticated:
@@ -74,7 +82,7 @@ def action(request):
         render_html = template.render({
             'feed':[post],
             'login' : request.user.is_authenticated,
-            'base_url' : rss_test.settings.BASE_URL
+            'base_url' : triceratops.settings.BASE_URL
         }, request)
         response = json.dumps({ "html": render_html })
     else:
@@ -92,7 +100,7 @@ def feeds(request):
             'feeds': feeds,
             'login' : request.user.is_authenticated,
             'args' : args,
-            'base_url' : rss_test.settings.BASE_URL
+            'base_url' : triceratops.settings.BASE_URL
     }        
     if 'no_header' not in request.GET:
         context['header'] = True
@@ -189,7 +197,7 @@ def get_feed(request,feed_query,template = loader.get_template('feed/templates/i
             'item_overflow' : item_overflow,
             'login' : request.user.is_authenticated,
             'args' : args,
-            'base_url' : rss_test.settings.BASE_URL
+            'base_url' : triceratops.settings.BASE_URL
     }        
     if 'no_header' not in request.GET:
         context['header'] = True
@@ -200,7 +208,7 @@ def base(request):
     template = loader.get_template('feed/templates/base.html')
     context = {
             'login' : request.user.is_authenticated,
-            'base_url' : rss_test.settings.BASE_URL
+            'base_url' : triceratops.settings.BASE_URL
     }        
     if 'no_header' not in request.GET:
         context['header'] = True

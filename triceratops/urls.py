@@ -14,19 +14,23 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
+from django.conf.urls import url,include
 from django.contrib import admin
 import feed.views
+import feed_profile.views
 
 urlpatterns = [
     url(r'^rss/$', feed.views.index, name='index'),
     url(r'^rss/action$', feed.views.action, name='action'),
     url(r'^rss/upload$', feed.views.upload, name='upload'),
     url(r'^rss/feeds$', feed.views.feeds, name='feeds'),
+    url(r'^rss/profile/(?P<url>[\w\-]+)$', feed_profile.views.index, name='index'),
     url(r'^rss/post/(?P<url>[\w\-]+)$', feed.views.post, name='post'),
     url(r'^rss/feed/(?P<url>[\w\-]+)$', feed.views.feed, name='feed'),
     url(r'^rss/tag/(?P<tag_name>.+)$', feed.views.tag, name='tag'),
     url(r'^rss/base$', feed.views.base, name='base'),
     url(r'^rss/admin/', admin.site.urls),
+    url(r'^rss/login$', feed.views.login, name='login'),
+    url(r'^oauth/', include('social_django.urls', namespace='social')),
 ]
 admin.site.site_url = '/rss'

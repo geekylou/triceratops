@@ -1,0 +1,6 @@
+{% extends "feed/templates/base.html" %}
+{% block content %}
+<h1 style="text-align: center">{{ profile.user.username }}</h1>
+<p style="text-align: center">@{{ profile.user.username }}</p>
+{{ profile.html|safe }}
+{% endblock %}

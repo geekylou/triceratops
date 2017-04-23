@@ -7,7 +7,7 @@ from django.contrib.postgres.fields import JSONField,ArrayField
 from django.conf import settings
 
 import markdown2
-import rss_test.settings
+import triceratops.settings
 import bleach
 
 def update_indexes():

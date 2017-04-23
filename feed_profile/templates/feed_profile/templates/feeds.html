@@ -1,0 +1,25 @@
+{% extends "feed/templates/base.html" %}
+{% block content %}
+<table class="table" style="margin-right:15px;margin-left:15px;width:80%">
+<thead>
+    <tr>
+      <th>Feed title</th>
+      <th>Enabled</th>
+      <th>Public</th>
+    </tr>
+</thead>
+{% for item in feeds %}
+<tr>
+<td>
+	 <a href="{{ item.url }}">{{ item|safe }}</a>
+</td>
+<td>
+    <input type="checkbox" {% if item.enabled %}checked{% endif %}>
+</td>
+<td>
+    <input type="checkbox" {% if item.public %}checked{% endif %}>
+</td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}
